@@ -1,7 +1,7 @@
 #include "Server.h"
 
 SHAREDMEM message;
-GAMEDATA gamedata;
+static GAMEDATA gamedata;
 PLAYERS* players = NULL;
 BALL* balls;
 BRICK bricks[NUMBER_TOTAL_BRIKS];
@@ -10,6 +10,7 @@ TCHAR nome[10][MAXT] = { TEXT("User 1"), TEXT("User 2"), TEXT("User 3"), TEXT("U
 static int values[10] = { 90, 80, 70, 60, 50, 40, 30, 20, 10, 0 };
 
 int nPipes = 0;
+int nBricks = 0;
 
 int initAccel;
 int initLife;
@@ -465,7 +466,7 @@ BOOL BuildReply(PLAYERS* pAction)
 	return true;
 }
 
-BOOL SendBroadcast(BALL* ball)
+BOOL SendBroadcast(BALL* ball, BRICK *brick)
 {
 
 	WaitForSingleObject(hCanWriteBroad, INFINITE);
@@ -474,6 +475,9 @@ BOOL SendBroadcast(BALL* ball)
 	for (int i = 0; i < nBalls; i++)
 		gamedata.ball[gamedata.in][i] = ball[i];
 	gamedata.nBalls = nBalls;
+	for (int i = 0; i < nBricks; i++)
+		gamedata.bricks[gamedata.in][i] = brick[i];
+	gamedata.nBricks = nBricks;
 	//_tprintf(__T("BALL -> x: %d y: %d IN: %d OUT: %d\n"), gamedata.ball[gamedata.in].x, gamedata.ball[gamedata.in].y, gamedata.in, gamedata.out);
 
 	if (gamedata.out == 10)
@@ -490,6 +494,8 @@ BOOL SendBroadcast(BALL* ball)
 
 	ReleaseMutex(hMutexBroad);
 	ReleaseSemaphore(hCanReadBroad, 1, NULL);
+	for (int i = 0; i < nBalls; i++)
+		ball[i] = gamedata.ball[gamedata.in][i];
 	return true;
 }
 
@@ -501,6 +507,9 @@ BOOL SendBroadcast(BALL* ball)
 // para a versão meta 2, fazer consulta das posicoes dos blocos.
 DWORD WINAPI BallMovement(LPVOID lparam)
 {
+	BRICK* brAux = NULL;
+	brAux = CreateBricks(brAux);
+
 	int* id = (int*)lparam;
 	balls[nBalls - 1].x = MAX_SCREEN_WIDTH / 2;  // metade de 1 ecra HD, fica ao centro.
 	balls[nBalls - 1].y = MAX_SCREEN_HEIGHT / 2; // metade de 1 ecra HD, fica ao centro.
@@ -668,7 +677,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 		if(nPipes > 0)
 			SendBroadcastPipe(balls);
 		if(memPlayers > 0)
-			SendBroadcast(balls);
+			SendBroadcast(balls, brAux);
 	}
 	return 0;
 }
@@ -700,56 +709,64 @@ BOOL AddBall()
 	return 1;
 }
 
-BRICK* CreatBricks()
-{
+BRICK * CreateBricks(BRICK *varBrick)
+{	
+	nBricks = 20;
 	srand(time(NULL));
+	varBrick = (BRICK *)malloc(sizeof(BRICK) * nBricks);
+	
+	if (!varBrick) {
+		_tprintf(TEXT("[ERROR] Alocação de memória falhada! GLE: %d\n"), GetLastError());
+		varBrick = NULL;
+		return varBrick;
+	}
+
 	int randNum;
-	for (int i = 0, line=0, col = 0; i < NUMBER_TOTAL_BRIKS; i++)
+	for (int i = 0, line=0, col = 0; i < nBricks; i++)
 	{
 		// set da coordenada xy.
 		if (col++ < NUMBER_BRIKS_COL) {
-			bricks[i].x = X_STARPOINT_BRICKS + col * BRICK_WIDTH;
-			bricks[i].y = Y_STARPOINT_BRICKS + line * BRICK_HEIGHT;
+			varBrick[i].x = X_STARPOINT_BRICKS + col * BRICK_WIDTH;
+			varBrick[i].y = Y_STARPOINT_BRICKS + line * BRICK_HEIGHT;
 		}
 		else {
 			col = 0;
 			line++;
-			bricks[i].x = X_STARPOINT_BRICKS + col * BRICK_WIDTH;
-			bricks[i].y = Y_STARPOINT_BRICKS + line * BRICK_HEIGHT;
+			varBrick[i].x = X_STARPOINT_BRICKS + col * BRICK_WIDTH;
+			varBrick[i].y = Y_STARPOINT_BRICKS + line * BRICK_HEIGHT;
 		}
 
 		randNum = rand() % 100;
 		if (randNum > 40) {
-			bricks[i].health = 1;
-			bricks[i].type = STD_BRICK;
+			varBrick[i].health = 1;
+			varBrick[i].type = STD_BRICK;
 		}
 		else if (randNum > 30) {
-			bricks[i].type = STD_BRICK;
-			bricks[i].health = 2;
+			varBrick[i].type = STD_BRICK;
+			varBrick[i].health = 2;
 		}
 		else if (randNum > 20) {
-			bricks[i].type = STD_BRICK;
-			bricks[i].health = 3;
+			varBrick[i].type = STD_BRICK;
+			varBrick[i].health = 3;
 		}
 		else if (randNum > 10) {
-			bricks[i].type = STD_BRICK;
-			bricks[i].health = 4;
+			varBrick[i].type = STD_BRICK;
+			varBrick[i].health = 4;
 		}
 		else {
-			bricks[i].health = 1;
+			varBrick[i].health = 1;
 			randNum = rand() % 4;
 			if (randNum == 1)
-				bricks[i].type = BRICK_SPEEDUP;
+				varBrick[i].type = BRICK_SPEEDUP;
 			else if (randNum == 2)
-				bricks[i].type = BRICK_SLOWDOWN;
+				varBrick[i].type = BRICK_SLOWDOWN;
 			else if (randNum == 3)
-				bricks[i].type = BRICK_EXTRALIFE;
+				varBrick[i].type = BRICK_EXTRALIFE;
 			else
-				bricks[i].type = BRICK_TRIPLE;
+				varBrick[i].type = BRICK_TRIPLE;
 		}
-		return NULL;
 	}
-	return NULL;
+	return varBrick;
 }
 
 BOOL RemoveBall()
@@ -1184,7 +1201,7 @@ void ReadGameSettings(wchar_t* fileName) {
 		return;
 	}
 	else {
-		fwprintf_s(set, TEXT("%d %d"), 50, 3);
+		fwprintf_s(set, TEXT("%d %d"), 10, 3);
 		// Set pointer to beginning of file:
 		fseek(set, 0L, SEEK_SET);
 		//Lê dados do ficheiro de configuração

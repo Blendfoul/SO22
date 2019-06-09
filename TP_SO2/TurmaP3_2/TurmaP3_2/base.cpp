@@ -38,7 +38,7 @@ HWND hWnd;
 
 int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
 {
-			  // hWnd é o handler da janela, gerado mais abaixo por CreateWindow()
+	// hWnd é o handler da janela, gerado mais abaixo por CreateWindow()
 	MSG lpMsg;		  // MSG é uma estrutura definida no Windows para as mensagens
 	WNDCLASSEX wcApp; // WNDCLASSEX é uma estrutura cujos membros servem para
 	DWORD threadID;
@@ -79,7 +79,7 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int
 	// ============================================================================
 	// 3. Criar a janela
 	// ============================================================================
-	
+
 	LIVE = TRUE;
 	hBallControl = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Ball, NULL, 0, &threadID);
 	if (hBallControl == NULL)
@@ -89,17 +89,17 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int
 	}
 
 	DWORD dwStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
-	
+
 	hWnd = CreateWindow(
-		szProgName,							 // Nome da janela (programa) definido acima
-		TEXT("Arkanoid"),					 // Texto que figura na barra do título
-		dwStyle,							 // Estilo da janela (WS_OVERLAPPED= normal)
-		CW_USEDEFAULT,						 // Posição x pixels (default=à direita da última)
-		CW_USEDEFAULT,						 // Posição y pixels (default=abaixo da última)
-		MAX_SCREEN_WIDTH,					 // Largura da janela (em pixels)
-		MAX_SCREEN_HEIGHT,					 // Altura da janela (em pixels)
-		(HWND)HWND_DESKTOP,					 // handle da janela pai (se se criar uma a partir de
-											 // outra) ou HWND_DESKTOP se a janela for a primeira,
+		szProgName,			   // Nome da janela (programa) definido acima
+		TEXT("Arkanoid"),	  // Texto que figura na barra do título
+		dwStyle,			   // Estilo da janela (WS_OVERLAPPED= normal)
+		CW_USEDEFAULT,		   // Posição x pixels (default=à direita da última)
+		CW_USEDEFAULT,		   // Posição y pixels (default=abaixo da última)
+		MAX_SCREEN_WIDTH + 15, // Largura da janela (em pixels)
+		MAX_SCREEN_HEIGHT,	 // Altura da janela (em pixels)
+		(HWND)HWND_DESKTOP,	// handle da janela pai (se se criar uma a partir de
+							   // outra) ou HWND_DESKTOP se a janela for a primeira,
 		// criada a partir do "desktop"
 		(HMENU)NULL,	  // handle do menu da janela (se tiver menu)
 		(HINSTANCE)hInst, // handle da instância do programa actual ("hInst" é
@@ -132,7 +132,6 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int
 	// 4)Código limite superior das mensagens que se pretendem receber
 	// NOTA: GetMessage() devolve 0 quando for recebida a mensagem de fecho da janela,
 	// terminando então o loop de recepção de mensagens, e o programa
-	
 
 	while (GetMessage(&lpMsg, NULL, 0, 0))
 	{
@@ -168,15 +167,18 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int
 // WM_DESTROY, WM_CHAR, WM_KEYDOWN, WM_PAINT...) definidas em windows.h ============================================================================
 LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
 {
-	DWORD threadID;
 	HDC hdc;
 	HDC memdc = NULL;
 	static TCHAR c;
 	static int x = 10, y = 10, xi = 0, yi = 0, xf = 0, yf = 0;
 	PAINTSTRUCT ps;
 
+	static HBITMAP bitTijolo;
 	HBITMAP fundo;
-
+	static HDC dcAux;
+	
+	
+	
 	switch (messg)
 	{
 		// outra) ou HWND_DESKTOP se a janela for a primeira,
@@ -223,7 +225,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			case -1:
 				tipe = 1;
 				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG1), hWnd, (DLGPROC)EventLogin);
-				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);			
+				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
 				break;
 			default:
 				MessageBox(hWnd, TEXT("Cliente já logado!"), TEXT("Servidor"), MB_OK);
@@ -252,7 +254,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			case 1:
 				_tcscpy_s(aux.command, TEXT("logout"));
 				SendMessages(&aux, aux.ipAdress);
-				aux = RecieveMessage(&aux,(TCHAR *) TEXT("9"));
+				aux = RecieveMessage(&aux, (TCHAR*)TEXT("9"));
 				if (aux.code == LOGOUTSUCCESS)
 					MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
 				PostQuitMessage(0);
@@ -277,14 +279,16 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		}
 		break;
 	case WM_CREATE:
+		bitTijolo = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1));
+
 		hdc = GetDC(hWnd);
 		memdc = CreateCompatibleDC(hdc);
 
 		fundo = CreateCompatibleBitmap(hdc, MAX_SCREEN_WIDTH, MAX_SCREEN_HEIGHT);
 		SelectObject(memdc, GetStockObject(DC_BRUSH));
-		SetDCBrushColor(memdc, RGB(62, 178, 72));//verde escuro o fundo
+		SetDCBrushColor(memdc, RGB(62, 178, 72)); //verde escuro o fundo
 		PatBlt(memdc, 0, 0, MAX_SCREEN_WIDTH, MAX_SCREEN_HEIGHT, PATCOPY);
-		
+
 		ReleaseDC(hWnd, hdc);
 		break;
 	case WM_PAINT:
@@ -293,16 +297,30 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		int i;
 		hdc = GetDC(hWnd);
 
-		switch (tipe) {
+		//dcAux = CreateCompatibleDC((HDC)(hdc));
+		SelectObject(dcAux, bitTijolo);
+
+		switch (tipe)
+		{
 		case 0:
-			for (i = 0; i < game.nBalls; i++) {
+			for (i = 0; i < game.nBricks; i++)
+			{
+				//BitBlt(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
+				//BitBlt(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
+				Rectangle(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
+				Rectangle(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
+			
+			}
+			for (i = 0; i < game.nBalls; i++)
+			{
 				Ellipse(hdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
 				Ellipse(memdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
 				Sleep(game.ball[game.out][i].accel);
 			}
 			break;
 		case 1:
-			for (i = 0; i < gameP.nBalls; i++) {
+			for (i = 0; i < gameP.nBalls; i++)
+			{
 				Ellipse(hdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
 				Ellipse(memdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
 				Sleep(gameP.ball->accel);
@@ -461,9 +479,10 @@ LRESULT CALLBACK CallUserStats(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPar
 		break;
 
 	default:
+		if (_tcscmp(view.command, aux.command) != 0)
+			MessageBox(hWnd, aux.command, TEXT("LP"), MB_OK);
 		if (view.score != aux.score || view.life != aux.life || _tcscmp(view.command, aux.command) != 0)
 		{
-			MessageBox(hWnd, aux.command, TEXT("LP"), MB_OK);
 			view = aux;
 			hWndList = GetDlgItem(hWnd, IDC_LIST1);
 			SendMessage(hWndList, LB_RESETCONTENT, 0, 0);
@@ -494,8 +513,8 @@ DWORD WINAPI Ball(LPVOID param)
 		switch (tipe)
 		{
 		case 0:
-			if(LOCALON == TRUE)
-			game = RecieveBroadcast(&game);
+			if (LOCALON == TRUE)
+				game = RecieveBroadcast(&game);
 			break;
 		case 1:
 			gameP = RecieveBroadcastPipe(&gameP, aux.ipAdress, aux.code);

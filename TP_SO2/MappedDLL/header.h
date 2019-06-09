@@ -94,8 +94,9 @@ typedef struct
 {
 	int in, out;
 	int nBalls;
+	int nBricks;
 	BALL ball[10][5];
-	BRICK bricks[10][NUMBER_TOTAL_BRIKS];
+	BRICK bricks[10][20];
 }GAMEDATA;
 
 typedef struct {
