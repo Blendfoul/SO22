@@ -504,36 +504,138 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 	int* id = (int*)lparam;
 	balls[nBalls - 1].x = MAX_SCREEN_WIDTH / 2;  // metade de 1 ecra HD, fica ao centro.
 	balls[nBalls - 1].y = MAX_SCREEN_HEIGHT / 2; // metade de 1 ecra HD, fica ao centro.
-	balls[nBalls - 1].trajectory = MOVE_BALL_UPLEFT;
+	balls[nBalls - 1].trajectory = MOVE_BALL_UPRIGHT;
 	balls[nBalls - 1].id = *id;
 	balls[nBalls - 1].accel = initAccel;
-	int nB = nBalls - 1;
+	BALL* ball; // aux
+	int indexNumBalls = nBalls - 1; // aux
 
-	while (LIVE == true && nBalls != nB)
+
+	while (LIVE == true && indexNumBalls >=0)
 	{
-
-		// TODO: Ver com a posição dos tijolos.
-		/*
-		*	o Tricky disto é que mudamos a posição atual da bola e mudamos a trajetoria (para fazermos o proximo check, and so on...)
-		*/
-		switch (balls[nB].trajectory)
+		// o Tricky disto é que mudamos a posição atual da bola e mudamos a trajetoria (para fazermos o proximo check, and so on...)
+		
+		ball = &balls[indexNumBalls];
+		
+		switch (ball->trajectory)
 		{
+			//logica de otimizacao: primeiro verificar tijolos(maior prob.) e depois os limites superior.
+			//nos moves descendentes faz-se ao contario
 		case MOVE_BALL_UPRIGHT:
+			//obstaculo canto
+			if( ball->x + 1 == MAX_SCREEN_WIDTH  &&  ball->y-1==0 )
+				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+			// obstaculo superior
+			else if (ball->y - 1 == 0) {
+				ball->x++;
+				ball->y++;
+				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+			}
+			// obstaculo direito
+			else if (ball->x + 1 == MAX_SCREEN_WIDTH) {
+				ball->x--;
+				ball->y--;
+				ball->trajectory = MOVE_BALL_UPLEFT;
+			}
+			// livre
+			else {
+				ball->x++;
+				ball->y--;
+			}
+			// o mesmo, mas apra os tijolos
 
-			if (balls[nB].y - 1 == 0)
+			SendBroadcast(&balls[indexNumBalls]);
+
+		case MOVE_BALL_DOWNRIGHT:
+			//obstaculo canto
+			if ( ball->x + 1 == MAX_SCREEN_WIDTH && ball->y + 1 == MAX_SCREEN_HEIGHT )
+				ball->trajectory = MOVE_BALL_UPLEFT;
+			// obstaculo inferior
+			else if (ball->y + 1 == MAX_SCREEN_HEIGHT) {
+				ball->x++;
+				ball->y--;
+				ball->trajectory = MOVE_BALL_UPRIGHT;
+			}
+			// obstaculo direito
+			else if (ball->x + 1 == MAX_SCREEN_WIDTH) {
+				ball->x--;
+				ball->y++;
+				ball->trajectory = MOVE_BALL_DOWNLEFT;
+			}
+			// livre
+			else {
+				ball->x++;
+				ball->y++;
+			}
+			// o mesmo, mas apra os tijolos
+
+			SendBroadcast(&balls[indexNumBalls]);
+
+		case MOVE_BALL_DOWNLEFT:
+			//obstaculo canto
+			if (ball->x - 1 == 0 && ball->y + 1 == MAX_SCREEN_HEIGHT )
+				ball->trajectory = MOVE_BALL_UPRIGHT;
+			// obstaculo inferior
+			else if (ball->y + 1 == MAX_SCREEN_HEIGHT) {
+				ball->x--;
+				ball->y--;
+				ball->trajectory = MOVE_BALL_UPLEFT;
+			}
+			// obstaculo esquerdo
+			else if (ball->x - 1 == 0) {
+				ball->x++;
+				ball->y++;
+				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+			}
+			// livre
+			else {
+				ball->x--;
+				ball->y++;
+			}
+			// o mesmo, mas apra os tijolos
+
+			SendBroadcast(&balls[indexNumBalls]);
+
+		case MOVE_BALL_UPLEFT:
+			//obstaculo canto
+			if (ball->x - 1 == 0 && ball->y - 1 == 0)
+				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+			// obstaculo superior
+			else if (ball->y - 1 == 0) {
+				ball->x--;
+				ball->y++;
+				ball->trajectory = MOVE_BALL_DOWNLEFT;
+			}
+			// obstaculo esquerdo
+			else if (ball->x + 1 == MAX_SCREEN_WIDTH) {
+				ball->x++;
+				ball->y--;
+				ball->trajectory = MOVE_BALL_UPRIGHT;
+			}
+			// livre
+			else {
+				ball->x--;
+				ball->y--;
+			}
+			// o mesmo, mas apra os tijolos
+
+			SendBroadcast(&balls[indexNumBalls]);
+/*
+			//--------
+			if (ball.y - 1 == 0)
 			{
-				balls[nB].y++; //descer
-				if (balls[nB].x + 1 == MAX_SCREEN_WIDTH || 0)
+				ball.y++; //descer
+				if (ball.x + 1 == MAX_SCREEN_WIDTH || 0)
 				{
-					balls[nB].x--; // obstaculo superior direito
-					balls[nB].trajectory = MOVE_BALL_DOWNLEFT;
+					ball.x--; // obstaculo superior direito
+					ball.trajectory = MOVE_BALL_DOWNLEFT;
 				}
 				else
 				{
-					balls[nB].x++; // obstaculo superior
-					balls[nB].trajectory = MOVE_BALL_DOWNRIGHT;
+					ball.x++; // obstaculo superior
+					ball.trajectory = MOVE_BALL_DOWNRIGHT;
 				}
-				if (balls[nB].y >= 1000)
+				if (ball.y >= 1000)
 				{
 				}
 				//_tprintf(__T("balls[nB] -> X: %d Y: %d Traj: %d ID: %d\n"), balls[nB].x, balls[nB].y, balls[nB].trajectory, balls[nB].id);
@@ -541,16 +643,16 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 			}
 			else
 			{
-				balls[nB].y--; //subir
-				if (balls[nB].x + 1 == MAX_SCREEN_WIDTH || 0)
+				ball.y--; //subir
+				if (ball.x + 1 == MAX_SCREEN_WIDTH || 0)
 				{
-					balls[nB].x--; // obstaculo direito
-					balls[nB].trajectory = MOVE_BALL_UPLEFT;
+					ball.x--; // obstaculo direito
+					ball.trajectory = MOVE_BALL_UPLEFT;
 				}
 				else
 				{ // sem obstaculo
-					balls[nB].x++;
-					balls[nB].trajectory = MOVE_BALL_UPRIGHT;
+					ball.x++;
+					ball.trajectory = MOVE_BALL_UPRIGHT;
 				}
 				//_tprintf(__T("balls[nB] -> X: %d Y: %d Traj: %d ID: %d\n"), balls[nB].x, balls[nB].y, balls[nB].trajectory, balls[nB].id);
 				//SendBroadcast(&balls[nB]);
@@ -559,34 +661,34 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 
 		case MOVE_BALL_UPLEFT:
 
-			if (balls[nB].y - 1 == 0 || 0)
+			if (ball.y - 1 == 0 || 0)
 			{
-				balls[nB].y++;
-				if (balls[nB].x - 1 == 0 || 0)
+				ball.y++;
+				if (ball.x - 1 == 0 || 0)
 				{ // obstaculo superior esquerdo
-					balls[nB].x++;
-					balls[nB].trajectory = MOVE_BALL_DOWNRIGHT;
+					ball.x++;
+					ball.trajectory = MOVE_BALL_DOWNRIGHT;
 				}
 				else
 				{ // obstaculo superior
-					balls[nB].x--;
-					balls[nB].trajectory = MOVE_BALL_DOWNLEFT;
+					ball.x--;
+					ball.trajectory = MOVE_BALL_DOWNLEFT;
 				}
 				//_tprintf(__T("balls[nB] -> X: %d Y: %d Traj: %d ID: %d\n"), balls[nB].x, balls[nB].y, balls[nB].trajectory, balls[nB].id);
 				//SendBroadcast(&balls[nB]);
 			}
 			else
 			{
-				balls[nB].y--;
-				if (balls[nB].x - 1 == 0 || 0)
+				ball.y--;
+				if (ball.x - 1 == 0 || 0)
 				{
-					balls[nB].x++; // obstaculo esquerdo
-					balls[nB].trajectory = MOVE_BALL_UPRIGHT;
+					ball.x++; // obstaculo esquerdo
+					ball.trajectory = MOVE_BALL_UPRIGHT;
 				}
 				else
 				{
-					balls[nB].x--; // sem obstaculo
-					balls[nB].trajectory = MOVE_BALL_UPLEFT;
+					ball.x--; // sem obstaculo
+					ball.trajectory = MOVE_BALL_UPLEFT;
 				}
 				//_tprintf(__T("balls[nB] -> X: %d Y: %d Traj: %d ID: %d\n"), balls[nB].x, balls[nB].y, balls[nB].trajectory, balls[nB].id);
 				//SendBroadcast(&balls[nB]);
@@ -594,34 +696,34 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 
 		case MOVE_BALL_DOWNRIGHT:
 
-			if (balls[nB].y + 1 == MAX_SCREEN_HEIGHT || 0)
+			if (ball.y + 1 == MAX_SCREEN_HEIGHT || 0)
 			{
-				balls[nB].y--;
-				if (balls[nB].x + 1 == MAX_SCREEN_WIDTH || 0)
+				ball.y--;
+				if (ball.x + 1 == MAX_SCREEN_WIDTH || 0)
 				{
-					balls[nB].x--;
-					balls[nB].trajectory = MOVE_BALL_UPLEFT;
+					ball.x--;
+					ball.trajectory = MOVE_BALL_UPLEFT;
 				}
 				else
 				{
-					balls[nB].x++;
-					balls[nB].trajectory = MOVE_BALL_UPRIGHT;
+					ball.x++;
+					ball.trajectory = MOVE_BALL_UPRIGHT;
 				}
 				//_tprintf(__T("balls[nB] -> X: %d Y: %d Traj: %d ID: %d\n"), balls[nB].x, balls[nB].y, balls[nB].trajectory, balls[nB].id);
 				//SendBroadcast(&balls[nB]);
 			}
 			else
 			{
-				balls[nB].y++;
-				if (balls[nB].x + 1 == MAX_SCREEN_WIDTH || 0)
+				ball.y++;
+				if (ball.x + 1 == MAX_SCREEN_WIDTH || 0)
 				{
-					balls[nB].x--;
-					balls[nB].trajectory = MOVE_BALL_DOWNLEFT;
+					ball.x--;
+					ball.trajectory = MOVE_BALL_DOWNLEFT;
 				}
 				else
 				{
-					balls[nB].x++;
-					balls[nB].trajectory = MOVE_BALL_DOWNRIGHT;
+					ball.x++;
+					ball.trajectory = MOVE_BALL_DOWNRIGHT;
 				}
 				//_tprintf(__T("balls[nB] -> X: %d Y: %d Traj: %d ID: %d\n"), balls[nB].x, balls[nB].y, balls[nB].trajectory, balls[nB].id);
 				//SendBroadcast(&balls[nB]);
@@ -629,38 +731,38 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 			break;
 
 		case MOVE_BALL_DOWNLEFT:
-			if (balls[nB].y + 1 == MAX_SCREEN_HEIGHT || 0)
+			if (ball.y + 1 == MAX_SCREEN_HEIGHT || 0)
 			{
-				balls[nB].y--;
-				if (balls[nB].x - 1 == 0 || 0)
+				ball.y--;
+				if (ball.x - 1 == 0 || 0)
 				{
-					balls[nB].x++;
-					balls[nB].trajectory = MOVE_BALL_UPRIGHT;
+					ball.x++;
+					ball.trajectory = MOVE_BALL_UPRIGHT;
 				}
 				else
 				{
-					balls[nB].x--;
-					balls[nB].trajectory = MOVE_BALL_UPLEFT;
+					ball.x--;
+					ball.trajectory = MOVE_BALL_UPLEFT;
 				}
 				//_tprintf(__T("balls[nB] -> X: %d Y: %d Traj: %d ID: %d\n"), balls[nB].x, balls[nB].y, balls[nB].trajectory, balls[nB].id);
 				//SendBroadcast(balls);
 			}
 			else
 			{
-				balls[nB].y++;
-				if (balls[nB].x - 1 == 0 || 0)
+				ball.y++;
+				if (ball.x - 1 == 0 || 0)
 				{
-					balls[nB].x++;
-					balls[nB].trajectory = MOVE_BALL_DOWNRIGHT;
+					ball.x++;
+					ball.trajectory = MOVE_BALL_DOWNRIGHT;
 				}
 				else
 				{
-					balls[nB].x--;
-					balls[nB].trajectory = MOVE_BALL_DOWNLEFT;
+					ball.x--;
+					ball.trajectory = MOVE_BALL_DOWNLEFT;
 				}
 				//_tprintf(__T("balls[nB] -> X: %d Y: %d Traj: %d ID: %d\n"), balls[nB].x, balls[nB].y, balls[nB].trajectory, balls[nB].id);
 			}
-
+*/
 		default:
 			break;
 		}
@@ -700,7 +802,7 @@ BOOL AddBall()
 	return 1;
 }
 
-BRICK* CreatBricks()
+void CreatBricks()
 {
 	srand(time(NULL));
 	int randNum;
@@ -747,9 +849,8 @@ BRICK* CreatBricks()
 			else
 				bricks[i].type = BRICK_TRIPLE;
 		}
-		return NULL;
 	}
-	return NULL;
+	return;
 }
 
 BOOL RemoveBall()
