@@ -252,7 +252,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			case 1:
 				_tcscpy_s(aux.command, TEXT("logout"));
 				SendMessages(&aux, aux.ipAdress);
-				aux = RecieveMessage(&aux, aux.ipAdress);
+				aux = RecieveMessage(&aux,(TCHAR *) TEXT("9"));
 				if (aux.code == LOGOUTSUCCESS)
 					MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
 				PostQuitMessage(0);
@@ -270,6 +270,9 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 				PostQuitMessage(0);
 				break;
 			}
+			break;
+		case ID_JOGO_INICIAR:
+			MessageBox(hWnd, TEXT("Instruções:\n1 -> Servidor -> Remoto/Local -> Introduzir Username\n\n\n\t\t2019"), TEXT("Iniciar"), MB_OK);
 			break;
 		}
 		break;
@@ -295,16 +298,17 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			for (i = 0; i < game.nBalls; i++) {
 				Ellipse(hdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
 				Ellipse(memdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
+				Sleep(game.ball[game.out][i].accel);
 			}
 			break;
 		case 1:
 			for (i = 0; i < gameP.nBalls; i++) {
 				Ellipse(hdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
 				Ellipse(memdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
+				Sleep(gameP.ball->accel);
 			}
 			break;
 		}
-
 
 		EndPaint(hWnd, &ps);
 		ReleaseDC(hWnd, hdc);
@@ -459,6 +463,7 @@ LRESULT CALLBACK CallUserStats(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPar
 	default:
 		if (view.score != aux.score || view.life != aux.life || _tcscmp(view.command, aux.command) != 0)
 		{
+			MessageBox(hWnd, aux.command, TEXT("LP"), MB_OK);
 			view = aux;
 			hWndList = GetDlgItem(hWnd, IDC_LIST1);
 			SendMessage(hWndList, LB_RESETCONTENT, 0, 0);
