@@ -4,7 +4,7 @@
 
 int tipe = -1;
 BOOL LIVE = FALSE;
-
+BOOL LOCALON = FALSE;
 /* ===================================================== */
 /* Programa base (esqueleto) para aplicações Windows */
 /* ===================================================== */
@@ -80,8 +80,14 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int
 	// 3. Criar a janela
 	// ============================================================================
 	
+	LIVE = TRUE;
+	hBallControl = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Ball, NULL, 0, &threadID);
+	if (hBallControl == NULL)
+	{
+		_tprintf(TEXT("Error creating thread\n"));
+		return EXIT_FAILURE;
+	}
 
-	
 	DWORD dwStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX;
 	
 	hWnd = CreateWindow(
@@ -184,6 +190,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			_tcscpy_s(aux.command, TEXT("logout"));
 			SendMessages(&aux, aux.ipAdress);
 			aux = RecieveMessage(&aux, aux.ipAdress);
+			LIVE = FALSE;
 			if (aux.code == LOGOUTSUCCESS)
 				MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
 			PostQuitMessage(0);
@@ -192,6 +199,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			_tcscpy_s(aux.command, TEXT("logout"));
 			SendMessages(&aux);
 			aux = RecieveMessage(&aux);
+			LIVE = FALSE;
 			if (aux.code == LOGOUTSUCCESS)
 				MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
 			PostQuitMessage(0);
@@ -214,9 +222,8 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			case -1:
 				tipe = 1;
 				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG1), hWnd, (DLGPROC)EventLogin);
-				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
-				
-break;
+				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);			
+				break;
 			default:
 				MessageBox(hWnd, TEXT("Cliente já logado!"), TEXT("Servidor"), MB_OK);
 				break;
@@ -229,13 +236,6 @@ break;
 				tipe = 0;
 				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG3), hWnd, (DLGPROC)EventLogin);
 				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
-				LIVE = TRUE;
-				hBallControl = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Ball, NULL, 0, &threadID);
-				if (hBallControl == NULL)
-				{
-					_tprintf(TEXT("Error creating thread\n"));
-					return EXIT_FAILURE;
-				}
 				break;
 			default:
 				MessageBox(hWnd, TEXT("Cliente já logado!"), TEXT("Servidor"), MB_OK);
@@ -361,7 +361,7 @@ LRESULT CALLBACK EventLogin(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
 				Login(&aux);
 				aux = RecieveMessage(&aux);
 				LIVE = TRUE;
-				
+				LOCALON = TRUE;
 				if (aux.code == 1)
 				{
 					MessageBox(hWnd, TEXT("[LOCAL] Login com sucesso!"), TEXT("Login Result"), MB_OK);
@@ -488,6 +488,7 @@ DWORD WINAPI Ball(LPVOID param)
 		switch (tipe)
 		{
 		case 0:
+			if(LOCALON == TRUE)
 			game = RecieveBroadcast(&game);
 			break;
 		case 1:
