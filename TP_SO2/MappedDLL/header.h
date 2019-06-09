@@ -29,7 +29,14 @@
 #define LOGOUTSUCCESS 9
 #define SERVERCLOSE 8
 #define IPSIZE 15
-#define NUMBER_BRIKS 20
+
+#define X_STARPOINT_BRICKS 170
+#define Y_STARPOINT_BRICKS 120
+#define BRICK_WIDTH 34
+#define BRICK_HEIGHT 12
+#define NUMBER_BRIKS_COL 10
+#define NUMBER_BRIKS_LINE 15
+#define NUMBER_TOTAL_BRIKS 150
 #define STD_BRICK 0
 #define BRICK_SPEEDUP 1
 #define BRICK_SLOWDOWN 2
@@ -72,21 +79,27 @@ typedef struct
 //	type distingue magico (!=0) de outros (=0)
 //	health distingue standart dos resistentes
 typedef struct {
-	int x0, x1, y0, y1;
+	int x, y;
 	int health;
 	char type;
 }BRICK;
+
+typedef struct {
+	int x, y;
+	int size;
+	int idPlayer;
+}BAR;
 
 typedef struct
 {
 	int in, out;
 	int nBalls;
 	BALL ball[10][5];
+	BRICK bricks[10][NUMBER_TOTAL_BRIKS];
 }GAMEDATA;
 
 typedef struct {
 	int nBalls;
-
 	BALL ball[5];
 }GAMEDATAPIPE;
 
