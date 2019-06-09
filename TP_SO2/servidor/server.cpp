@@ -504,7 +504,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 	int* id = (int*)lparam;
 	balls[nBalls - 1].x = MAX_SCREEN_WIDTH / 2;  // metade de 1 ecra HD, fica ao centro.
 	balls[nBalls - 1].y = MAX_SCREEN_HEIGHT / 2; // metade de 1 ecra HD, fica ao centro.
-	balls[nBalls - 1].trajectory = MOVE_BALL_UPRIGHT;
+	balls[nBalls - 1].trajectory = MOVE_BALL_UPLEFT;
 	balls[nBalls - 1].id = *id;
 	balls[nBalls - 1].accel = initAccel;
 	int nB = nBalls - 1;
