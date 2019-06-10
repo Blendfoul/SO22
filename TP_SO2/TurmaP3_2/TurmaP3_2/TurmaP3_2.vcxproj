@@ -91,7 +91,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>"$(Solutiondir)x64\Debug\MappedDLL.lib";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>"$(Solutiondir)x64\Debug\MappedDLL.lib";"winmm.lib";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

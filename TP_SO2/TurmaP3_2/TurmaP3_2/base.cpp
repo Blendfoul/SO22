@@ -196,6 +196,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			LIVE = FALSE;
 			if (aux.code == LOGOUTSUCCESS)
 				MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
+			PlaySound(TEXT("logoff.wav"), 0, SND_FILENAME | SND_ASYNC);
 			PostQuitMessage(0);
 			break;
 		case 0:
@@ -205,6 +206,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			LIVE = FALSE;
 			if (aux.code == LOGOUTSUCCESS)
 				MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
+			PlaySound(TEXT("logoff.wav"), 0, SND_FILENAME | SND_ASYNC);
 			PostQuitMessage(0);
 			break;
 		default:
@@ -225,7 +227,11 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			case -1:
 				tipe = 1;
 				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG1), hWnd, (DLGPROC)EventLogin);
-				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
+				if (aux.code == 1) {
+					PlaySound(TEXT("login.wav"), NULL, SND_FILENAME | SND_ASYNC);
+					//PlaySound(TEXT("coins.wav"), NULL, SND_FILENAME | SND_ASYNC);
+					DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
+				}
 				break;
 			default:
 				MessageBox(hWnd, TEXT("Cliente já logado!"), TEXT("Servidor"), MB_OK);
@@ -238,7 +244,11 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			case -1:
 				tipe = 0;
 				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG3), hWnd, (DLGPROC)EventLogin);
-				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
+				if (aux.code == 1) {
+					PlaySound(TEXT("login.wav"), 0, SND_FILENAME | SND_ASYNC);
+					//PlaySound(TEXT("coins.wav"), 0, SND_FILENAME | SND_ASYNC);
+					DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
+				}
 				break;
 			default:
 				MessageBox(hWnd, TEXT("Cliente já logado!"), TEXT("Servidor"), MB_OK);
@@ -246,6 +256,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			}
 			break;
 		case ID_JOGO_TOP10:
+			PlaySound(TEXT("coins.wav"), 0, SND_FILENAME | SND_ASYNC);
 			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG2), hWnd, (DLGPROC)CallTop10);
 			break;
 		case ID_JOGO_SAIR:
@@ -300,32 +311,34 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		//dcAux = CreateCompatibleDC((HDC)(hdc));
 		SelectObject(dcAux, bitTijolo);
 
-		switch (tipe)
-		{
-		case 0:
-			for (i = 0; i < game.nBricks; i++)
+		if (tipe != -1) {
+			switch (tipe)
 			{
-				//BitBlt(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
-				//BitBlt(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
-				Rectangle(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
-				Rectangle(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
-			
+			case 0:
+				for (i = 0; i < game.nBricks; i++)
+				{
+					//BitBlt(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
+					//BitBlt(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
+					Rectangle(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
+					Rectangle(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
+
+				}
+				for (i = 0; i < game.nBalls; i++)
+				{
+					Ellipse(hdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
+					Ellipse(memdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
+					Sleep(game.ball[game.out][i].accel);
+				}
+				break;
+			case 1:
+				for (i = 0; i < gameP.nBalls; i++)
+				{
+					Ellipse(hdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
+					Ellipse(memdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
+					Sleep(gameP.ball->accel);
+				}
+				break;
 			}
-			for (i = 0; i < game.nBalls; i++)
-			{
-				Ellipse(hdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
-				Ellipse(memdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
-				Sleep(game.ball[game.out][i].accel);
-			}
-			break;
-		case 1:
-			for (i = 0; i < gameP.nBalls; i++)
-			{
-				Ellipse(hdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
-				Ellipse(memdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
-				Sleep(gameP.ball->accel);
-			}
-			break;
 		}
 
 		EndPaint(hWnd, &ps);
