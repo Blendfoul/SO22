@@ -518,35 +518,39 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 	while (LIVE == true && nBalls != indexNumBalls && indexNumBalls >=0)
 	{
 		// o Tricky disto é que mudamos a posição atual da bola e mudamos a trajetoria (para fazermos o proximo check, and so on...)
-		Sleep(2);
+		
 		ball = &balls[indexNumBalls];
 		
 		switch (ball->trajectory)
 		{
-	
+
 		case MOVE_BALL_UPRIGHT:
-			
+
 			//obstaculo canto
-			if( ball->x + 1 >= MAX_SCREEN_WIDTH  &&  ball->y-1 <= 0 )
+			if (ball->x + 1 >= MAX_SCREEN_WIDTH && ball->y - 1 <= 0) {
 				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+				freeway = FALSE;
+			}
 			// obstaculo superior
 			else if (ball->y - 1 <= 0) {
-				ball->x+=1;
-				ball->y+=1;
+				ball->x += 1;
+				ball->y += 1;
 				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+				freeway = FALSE;
 			}
 			// obstaculo direito
 			else if (ball->x + 1 >= MAX_SCREEN_WIDTH) {
-				ball->x-=1;
-				ball->y-=1;
+				ball->x -= 1;
+				ball->y -= 1;
 				ball->trajectory = MOVE_BALL_UPLEFT;
+				freeway = FALSE;
 			}
 			// tijolo? let's check
 			else {
 				for (int i = 0; i < NUMBER_TOTAL_BRIKS; i++)
 				{
 					// tijolo sup
-					if (ball->x >= bricks[i].x && ball->x <= bricks[i].x + BRICK_WIDTH){	 // esta enquadrada na coluna dos xx
+					if (ball->x >= bricks[i].x && ball->x <= bricks[i].x + BRICK_WIDTH) {	 // esta enquadrada na coluna dos xx
 						if (ball->y - 1 >= bricks[i].y && ball->y - 1 <= bricks[i].y + BRICK_HEIGHT) { // dentro da espessura, do tijolo superior
 							bricks[i].health--;
 							ball->x++;
@@ -557,40 +561,44 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 					}
 					// tijolo dir
 					else if (ball->y >= bricks[i].y && ball->y <= bricks[i].y + BRICK_HEIGHT) { // enquadramento dos yy
-							if (ball->x + 1 >= bricks[i].x && ball->x <= bricks[i].x + BRICK_WIDTH) {		// dentro da lateral xx ?
-								bricks[i].health--;
-								ball->x--;
-								ball->y--;
-								freeway = FALSE;
-								break;
-							}
+						if (ball->x + 1 >= bricks[i].x && ball->x <= bricks[i].x + BRICK_WIDTH) {		// dentro da lateral xx ?
+							bricks[i].health--;
+							ball->x--;
+							ball->y--;
+							freeway = FALSE;
+							break;
+						}
 					}
 				}
 			}
 			// livre
-			if (freeway){
-				ball->x+=1;
-				ball->y-=1;
+			if (freeway) {
+				ball->x += 1;
+				ball->y -= 1;
 			}
-			
+
 			//tornar a variavel freeWay virgem do caso dos tijolos
 			freeway = TRUE;
 			break;
 		case MOVE_BALL_DOWNRIGHT:
 			//obstaculo canto
-			if ( ball->x + 1 >= MAX_SCREEN_WIDTH && ball->y + 1 >= MAX_SCREEN_HEIGHT )
+			if (ball->x + 1 >= MAX_SCREEN_WIDTH && ball->y + 1 >= MAX_SCREEN_HEIGHT) {
 				ball->trajectory = MOVE_BALL_UPLEFT;
+				freeway = FALSE;
+			}
 			// obstaculo inferior
 			else if (ball->y + 1 >= MAX_SCREEN_HEIGHT) {
-				ball->x+= 1;
-				ball->y-= 1;
+				ball->x += 1;
+				ball->y -= 1;
 				ball->trajectory = MOVE_BALL_UPRIGHT;
+				freeway = FALSE;
 			}
 			// obstaculo direito
 			else if (ball->x + 1 >= MAX_SCREEN_WIDTH) {
-				ball->x-= 1;
-				ball->y+= 1;
+				ball->x -= 1;
+				ball->y += 1;
 				ball->trajectory = MOVE_BALL_DOWNLEFT;
+				freeway = FALSE;
 			}
 			// embateu barra
 			//else if(ball->x-1 >= barra x && ball->x+1 <= barra x + sizebarra)
@@ -600,54 +608,58 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 			//freeway = FALSE;
 			//		break; // para o ciclio das barras
 			//	}
-			else{
-					for (int i = 0; i < NUMBER_TOTAL_BRIKS; i++)
-					{
-						//tijolo inferior
-						if (ball->x >= bricks[i].x && ball->x <= bricks[i].x+BRICK_WIDTH) {  // enquadramento xx
-							if (ball->y+1 >= bricks[i].y ) {
-								bricks[i].health--;
-								ball->x++;
-								ball->y--;
-								freeway = false;
-								break;
-							}
-						}
-						else if (ball->y >= bricks[i].y && ball->y <= bricks[i].y + BRICK_HEIGHT ) {   // enquadramento yy
-							if (ball->x+1 >= bricks[i].x ) {
-								bricks[i].health--;
-								ball->x--;
-								ball->y++;
-								freeway = false;
-								break;
-							}
+			else {
+				for (int i = 0; i < NUMBER_TOTAL_BRIKS; i++)
+				{
+					//tijolo inferior
+					if (ball->x >= bricks[i].x && ball->x <= bricks[i].x + BRICK_WIDTH) {  // enquadramento xx
+						if (ball->y + 1 >= bricks[i].y) {
+							bricks[i].health--;
+							ball->x++;
+							ball->y--;
+							freeway = false;
+							break;
 						}
 					}
+					else if (ball->y >= bricks[i].y && ball->y <= bricks[i].y + BRICK_HEIGHT) {   // enquadramento yy
+						if (ball->x + 1 >= bricks[i].x) {
+							bricks[i].health--;
+							ball->x--;
+							ball->y++;
+							freeway = false;
+							break;
+						}
+					}
+				}
 			}
-			//// livre
-			if(freeway){
-				ball->x+= 1;
-				ball->y+= 1;
+			// livre
+			if (freeway) {
+				ball->x += 1;
+				ball->y += 1;
 			}
 
 			freeway = TRUE;
 			break;
-		
+
 		case MOVE_BALL_DOWNLEFT:
 			//obstaculo canto
-			if (ball->x - 1 <= 0 && ball->y + 1 >= MAX_SCREEN_HEIGHT )
+			if (ball->x - 1 <= 0 && ball->y + 1 >= MAX_SCREEN_HEIGHT) {
 				ball->trajectory = MOVE_BALL_UPRIGHT;
+				freeway = FALSE;
+			}
 			// obstaculo inferior
 			else if (ball->y + 1 >= MAX_SCREEN_HEIGHT) {
 				ball->x-= 1;
 				ball->y-= 1;
 				ball->trajectory = MOVE_BALL_UPLEFT;
+				freeway = FALSE;
 			}
 			// obstaculo esquerdo
 			else if (ball->x - 1 <= 0) {
 				ball->x+= 1;
 				ball->y+= 1;
 				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+				freeway = FALSE;
 			}
 			// embateu barra
 			//else if(ball->x-1 >= barra x && ball->x+1 <= barra x + sizebarra)
@@ -681,7 +693,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 					}
 				}
 			}
-			//// livre
+			// livre
 			if (freeway) {
 				ball->x += 1;
 				ball->y += 1;
@@ -692,19 +704,23 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 		case MOVE_BALL_UPLEFT:
 			//obstaculo canto
 
-			if (ball->x - 1 <= 0 && ball->y - 1 <= 0)
+			if (ball->x - 1 <= 0 && ball->y - 1 <= 0){
 				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+				freeway = FALSE;
+			}
 			// obstaculo superior
 			else if (ball->y - 1 <= 0) {
 				ball->x-=1;
 				ball->y+=1;
 				ball->trajectory = MOVE_BALL_DOWNLEFT;
+				freeway = FALSE;
 			}
 			// obstaculo esquerdo
 			else if (ball->x - 1 <= 0) {
 				ball->x+=1;
 				ball->y-=1;
 				ball->trajectory = MOVE_BALL_UPRIGHT;
+				freeway = FALSE;
 			}
 			else {
 				for (int i = 0; i < NUMBER_TOTAL_BRIKS; i++)
@@ -1271,7 +1287,7 @@ void ReadGameSettings(wchar_t* fileName) {
 		return;
 	}
 	else {
-		fwprintf_s(set, TEXT("%d %d"), 50, 3);
+		fwprintf_s(set, TEXT("%d %d"), 100, 3);
 		// Set pointer to beginning of file:
 		fseek(set, 0L, SEEK_SET);
 		//Lê dados do ficheiro de configuração
