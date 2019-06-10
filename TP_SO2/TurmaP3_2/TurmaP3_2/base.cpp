@@ -219,7 +219,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		switch (LOWORD(wParam))
 		{
 		case ID_SOBRE:
-			MessageBox(hWnd, TEXT("\tArkanoid\n\n\nDeveloped by:\nJoão Rodrigues 21240370\nMarco Ferreira 21260***"), TEXT("Sobre"), MB_OK);
+			MessageBox(hWnd, TEXT("\tArkanoid\n\n\nDeveloped by:\nJoão Rodrigues 21240370\nMarco Ferreira 21260292\n"), TEXT("Sobre"), MB_OK);
 			break;
 		case ID_CLIENTE_REMOTO:
 			switch (tipe)
@@ -528,8 +528,6 @@ LRESULT CALLBACK CallUserStats(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPar
 		break;
 
 	default:
-		if (_tcscmp(view.command, aux.command) != 0)
-			MessageBox(hWnd, aux.command, TEXT("LP"), MB_OK);
 		if (view.score != aux.score || view.life != aux.life || _tcscmp(view.command, aux.command) != 0)
 		{
 			view = aux;
