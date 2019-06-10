@@ -539,8 +539,8 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 			//}
 			//// livre
 			//else {
-				ball->x++;
-				ball->y--;
+				ball->x+=2;
+				ball->y-=2;
 			//}
 			// o mesmo, mas apra os tijolos
 
