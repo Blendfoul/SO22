@@ -86,4 +86,5 @@ void Seguranca(SECURITY_ATTRIBUTES* sa);
 void Cleanup(PSID pEveryoneSID, PSID pAdminSID, PACL pACL, PSECURITY_DESCRIPTOR pSD);
 void ReadGameSettings(wchar_t* fileName);
 BRICK * CreateBricks(BRICK *);
+BAR* CreatePlayerBar(BAR* bar, int* id);
 //PLAYERS ShowTop10(PLAYERS* pAction);

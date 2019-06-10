@@ -5,11 +5,13 @@ GAMEDATA gamedata;
 PLAYERS* players = NULL;
 BALL* balls;
 BRICK *bricks;
+BAR* bars;
 
 TCHAR nome[10][MAXT] = { TEXT("User 1"), TEXT("User 2"), TEXT("User 3"), TEXT("User 4"), TEXT("User 5"), TEXT("User 6"), TEXT("User 7"), TEXT("User 8"), TEXT("User 9"), TEXT("User 10") };
 static int values[10] = { 90, 80, 70, 60, 50, 40, 30, 20, 10, 0 };
 
 int nPipes = 0;
+int nBars = 0;
 
 int initAccel;
 int initLife;
@@ -196,6 +198,8 @@ int _tmain(int argc, TCHAR* argv[])
 		free(hMovBola);
 	free(ballThreadId);
 	free(players);
+	free(bars);
+	free(bricks);
 
 	//Semaphore Players
 	CloseHandle(hCanRead);
@@ -338,6 +342,8 @@ BOOL HandleAction(PLAYERS pAction, HANDLE pipeConection)
 	if (!validID && !validUsername && !gameOn && nPlayers < MAX_PLAYERS)
 	{
 		pAction = AddPlayerToArray(&pAction);
+		nBars++;
+		bars = CreatePlayerBar(bars, &pAction.id);
 		//_tprintf(TEXT("%d"), pAction.code);
 		nPlayers++;
 		if (pipeConection == NULL)
@@ -1191,10 +1197,13 @@ BOOL SendBroadcastPipe(BALL *balls) {
 
 	data.nBalls = nBalls;
 	data.nBricks = NUMBER_TOTAL_BRIKS;
-	for (int i = 0; i < nBalls; i++)
+	data.nBars = nBars;
+	for (int i = 0; i < data.nBalls; i++)
 		data.ball[i] = balls[i];
 	for (int i = 0; i < data.nBricks; i++)
 		data.bricks[i] = bricks[i];
+	for (int i = 0; i < data.nBars; i++)
+		data.bars[i] = bars[i];
 	
 	for (int j = 0; j < nPipes; j++) {
 
@@ -1302,3 +1311,16 @@ void ReadGameSettings(wchar_t* fileName) {
 	fclose(set);
 }
 
+BAR* CreatePlayerBar(BAR *bar, int *id) {
+	bar = (BAR*)realloc(bar, sizeof(BAR) * nBars);
+
+	if (bar == NULL)
+		return bar;
+	
+	bar[nBars - 1].idPlayer = *id;
+	bar[nBars - 1].size = BAR_SIZE;
+	bar[nBars - 1].x = 500;
+	bar[nBars - 1].y = 100;
+
+	return bar;
+}

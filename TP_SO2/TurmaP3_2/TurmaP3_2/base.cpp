@@ -341,6 +341,14 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 				Ellipse(memdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
 				Sleep(gameP.ball->accel);
 			}
+
+			for (int i = 0; i < gameP.nBars; i++)
+			{
+				if (gameP.bars[i].idPlayer == aux.id) {
+					Rectangle(hdc, gameP.bars[i].x, gameP.bars[i].y, gameP.bars[i].x + gameP.bars[i].size, gameP.bars[i].y + 10); 
+					Rectangle(memdc, gameP.bars[i].x, gameP.bars[i].y, gameP.bars[i].x + gameP.bars[i].size, gameP.bars[i].y + 10);
+				}
+			}
 		}
 
 		EndPaint(hWnd, &ps);
