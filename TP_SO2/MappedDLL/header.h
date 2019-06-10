@@ -44,6 +44,7 @@
 #define BRICK_TRIPLE 4
 #define MAX_SCREEN_WIDTH 1024
 #define MAX_SCREEN_HEIGHT 768
+#define BAR_SIZE 60
 
 typedef struct {
 	TCHAR names[10][MAX];
@@ -90,7 +91,7 @@ typedef struct {
 	int idPlayer;
 }BAR;
 
-typedef struct
+typedef struct //Deprecated
 {
 	int in, out;
 	int nBalls;
@@ -102,6 +103,8 @@ typedef struct
 typedef struct {
 	int nBalls;
 	int nBricks;
+	int nBars;
+	BAR bars[5];
 	BALL ball[5];
 	BRICK bricks[NUMBER_TOTAL_BRIKS];
 }GAMEDATAPIPE;

@@ -196,7 +196,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			LIVE = FALSE;
 			if (aux.code == LOGOUTSUCCESS)
 				MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
-			PlaySound(TEXT("logoff.wav"), 0, SND_FILENAME | SND_ASYNC);
+			PlaySound(TEXT("logoff.wav"), 0, SND_FILENAME);
 			PostQuitMessage(0);
 			break;
 		case 0:
@@ -206,7 +206,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			LIVE = FALSE;
 			if (aux.code == LOGOUTSUCCESS)
 				MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
-			PlaySound(TEXT("logoff.wav"), 0, SND_FILENAME | SND_ASYNC);
+			PlaySound(TEXT("logoff.wav"), 0, SND_FILENAME);
 			PostQuitMessage(0);
 			break;
 		default:
@@ -321,18 +321,22 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		SelectObject(dcAux[3], bitAnim3);
 		SelectObject(dcAux[4], bitBrickHard);
 		SelectObject(dcAux[5], bitBrickMagic);
-
+		
 		if (tipe != -1) {
+			for (int i = 0; i < gameP.nBars; i++)
+			{
+					Rectangle(hdc, gameP.bars[i].x, gameP.bars[i].y, gameP.bars[i].x + gameP.bars[i].size, gameP.bars[i].y + 10);
+					Rectangle(memdc, gameP.bars[i].x, gameP.bars[i].y, gameP.bars[i].x + gameP.bars[i].size, gameP.bars[i].y + 10);
+			}
 			for (i = 0; i < gameP.nBricks; i++)
 			{
 				if (gameP.bricks[i].health == 0) {
-					
+					BitBlt(hdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[2], 0, 0, SRCCOPY);
+					BitBlt(memdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[2], 0, 0, SRCCOPY);
 				}
 				else {
 					BitBlt(hdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
 					BitBlt(memdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
-					//Rectangle(hdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
-					//Rectangle(memdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
 				}
 			}
 			for (i = 0; i < gameP.nBalls; i++)
@@ -349,13 +353,39 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		ReleaseDC(hWnd, hdc);
 		break;
 	case WM_KEYDOWN:
-		if (wParam == VK_RIGHT)
-		{
-			x += 10;
-			/*hdc = GetDC(hWnd);
-			TextOut(hdc, x, y, &c, 1);
-			ReleaseDC(hWnd, hdc);*/
-			InvalidateRect(hWnd, NULL, 1);
+		switch (tipe) {
+		case 0:
+			switch (wParam) {
+			case VK_RIGHT:
+				_tcscpy_s(aux.command, MAX, TEXT("right"));
+				SendMessages(&aux);
+				aux = RecieveMessage(&aux);
+				_tcscpy_s(aux.command, MAX, TEXT(""));
+				break;
+			case VK_LEFT:
+				_tcscpy_s(aux.command, MAX, TEXT("left"));
+				SendMessages(&aux);
+				aux = RecieveMessage(&aux);
+				_tcscpy_s(aux.command, MAX, TEXT(""));
+				break;
+			}
+			break;
+		case 1:
+			switch (wParam) {
+			case VK_RIGHT:
+				_tcscpy_s(aux.command, MAX, TEXT("right"));
+				SendMessages(&aux, aux.ipAdress);
+				aux = RecieveMessage(&aux, aux.ipAdress);
+				_tcscpy_s(aux.command, MAX, TEXT(""));
+				break;
+			case VK_LEFT:
+				_tcscpy_s(aux.command, MAX, TEXT("left"));
+				SendMessages(&aux, aux.ipAdress);
+				aux = RecieveMessage(&aux, aux.ipAdress);
+				_tcscpy_s(aux.command, MAX, TEXT(""));
+				break;
+			}
+			break;
 		}
 		break;
 	default:
@@ -491,6 +521,10 @@ LRESULT CALLBACK CallUserStats(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPar
 		lrPos = SendMessage(hWndList, LB_ADDSTRING, 0, (LPARAM)string);
 		_stprintf_s(string, MAX, __T("Ultimo comando: %s"), aux.command);
 		lrPos = SendMessage(hWndList, LB_ADDSTRING, 0, (LPARAM)string);
+		_stprintf_s(string, MAX, __T("Barra X: %d"), gameP.bars[0].x);
+		lrPos = SendMessage(hWndList, LB_ADDSTRING, 0, (LPARAM)string);
+		_stprintf_s(string, MAX, __T("Barra Y: %d"), gameP.bars[0].y);
+		lrPos = SendMessage(hWndList, LB_ADDSTRING, 0, (LPARAM)string);
 		break;
 
 	default:
@@ -508,6 +542,10 @@ LRESULT CALLBACK CallUserStats(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPar
 			_stprintf_s(string, MAX, __T("Pontuação: %d"), view.score);
 			lrPos = SendMessage(hWndList, LB_ADDSTRING, 0, (LPARAM)string);
 			_stprintf_s(string, MAX, __T("Ultimo comando: %s"), view.command);
+			lrPos = SendMessage(hWndList, LB_ADDSTRING, 0, (LPARAM)string);
+			_stprintf_s(string, MAX, __T("Barra X: %d"), gameP.bars[0].x);
+			lrPos = SendMessage(hWndList, LB_ADDSTRING, 0, (LPARAM)string);
+			_stprintf_s(string, MAX, __T("Barra Y: %d"), gameP.bars[0].y);
 			lrPos = SendMessage(hWndList, LB_ADDSTRING, 0, (LPARAM)string);
 		}
 		break;
