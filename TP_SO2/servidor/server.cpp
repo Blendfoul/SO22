@@ -5,7 +5,7 @@ GAMEDATA gamedata;
 PLAYERS* players = NULL;
 BALL* balls;
 BRICK *bricks;
-BAR* bars;
+BAR* bars = NULL;
 
 TCHAR nome[10][MAXT] = { TEXT("User 1"), TEXT("User 2"), TEXT("User 3"), TEXT("User 4"), TEXT("User 5"), TEXT("User 6"), TEXT("User 7"), TEXT("User 8"), TEXT("User 9"), TEXT("User 10") };
 static int values[10] = { 90, 80, 70, 60, 50, 40, 30, 20, 10, 0 };
@@ -371,6 +371,23 @@ BOOL HandleAction(PLAYERS pAction, HANDLE pipeConection)
 		if (pipeConection == NULL)
 			memPlayers--;
 		pAction.code = LOGOUTSUCCESS;
+	}
+
+	else if (_tcscmp(pAction.command, TEXT("left")) == 0) {
+		int i;
+		for (i = 0; i < nBars; i++)
+			if (bars[i].idPlayer == pAction.id)
+				bars[i].x -= 10;
+	
+		_tprintf(TEXT("Bar X: %d\n"), bars[0].x);
+	}
+
+	else if (_tcscmp(pAction.command, TEXT("right")) == 0) {
+		int i;
+		for (i = 0; i < nBars; i++)
+			if (bars[i].idPlayer == pAction.id)
+				bars[i].x += 10;
+		_tprintf(TEXT("Bar X: %d"), bars[0].x);
 	}
 
 	if (pipeConection == NULL)
@@ -1299,7 +1316,7 @@ BAR* CreatePlayerBar(BAR *bar, int *id) {
 	bar[nBars - 1].idPlayer = *id;
 	bar[nBars - 1].size = BAR_SIZE;
 	bar[nBars - 1].x = 500;
-	bar[nBars - 1].y = 100;
+	bar[nBars - 1].y = 650;
 
 	return bar;
 }
