@@ -514,7 +514,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 	while (LIVE == true && nBalls != indexNumBalls && indexNumBalls >=0)
 	{
 		// o Tricky disto é que mudamos a posição atual da bola e mudamos a trajetoria (para fazermos o proximo check, and so on...)
-		
+		Sleep(10);
 		ball = &balls[indexNumBalls];
 		
 		switch (ball->trajectory)
@@ -522,99 +522,100 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 			//logica de otimizacao: primeiro verificar tijolos(maior prob.) e depois os limites superior.
 			//nos moves descendentes faz-se ao contario
 		case MOVE_BALL_UPRIGHT:
-			////obstaculo canto
-			//if( ball->x + 1 == MAX_SCREEN_WIDTH  &&  ball->y-1==0 )
-			//	ball->trajectory = MOVE_BALL_DOWNRIGHT;
-			//// obstaculo superior
-			//else if (ball->y - 1 == 0) {
-			//	ball->x++;
-			//	ball->y++;
-			//	ball->trajectory = MOVE_BALL_DOWNRIGHT;
-			//}
-			//// obstaculo direito
-			//else if (ball->x + 1 == MAX_SCREEN_WIDTH) {
-			//	ball->x--;
-			//	ball->y--;
-			//	ball->trajectory = MOVE_BALL_UPLEFT;
-			//}
-			//// livre
-			//else {
+			//obstaculo canto
+			if( ball->x + 1 >= MAX_SCREEN_WIDTH  &&  ball->y-1 <= 0 )
+				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+			// obstaculo superior
+			else if (ball->y - 1 <= 0) {
 				ball->x+=2;
+				ball->y+=2;
+				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+			}
+			// obstaculo direito
+			else if (ball->x + 1 >= MAX_SCREEN_WIDTH) {
+				ball->x-=2;
 				ball->y-=2;
-			//}
-			// o mesmo, mas apra os tijolos
+				ball->trajectory = MOVE_BALL_UPLEFT;
+			}
+			// livre
+			else {
+				ball->x+=1;
+				ball->y-=1;
+			}
+			 //o mesmo, mas apra os tijolos
 
 
 		case MOVE_BALL_DOWNRIGHT:
-			////obstaculo canto
-			//if ( ball->x + 1 == MAX_SCREEN_WIDTH && ball->y + 1 == MAX_SCREEN_HEIGHT )
-			//	ball->trajectory = MOVE_BALL_UPLEFT;
-			//// obstaculo inferior
-			//else if (ball->y + 1 == MAX_SCREEN_HEIGHT) {
-			//	ball->x++;
-			//	ball->y--;
-			//	ball->trajectory = MOVE_BALL_UPRIGHT;
-			//}
-			//// obstaculo direito
-			//else if (ball->x + 1 == MAX_SCREEN_WIDTH) {
-			//	ball->x--;
-			//	ball->y++;
-			//	ball->trajectory = MOVE_BALL_DOWNLEFT;
-			//}
-			////// livre
-			//else {
-				ball->x++;
-				ball->y++;
-			//}
-			// o mesmo, mas apra os tijolos
+			//obstaculo canto
+			if ( ball->x + 1 >= MAX_SCREEN_WIDTH && ball->y + 1 >= MAX_SCREEN_HEIGHT )
+				ball->trajectory = MOVE_BALL_UPLEFT;
+			// obstaculo inferior
+			else if (ball->y + 1 >= MAX_SCREEN_HEIGHT) {
+				ball->x+= 2;
+				ball->y-= 2;
+				ball->trajectory = MOVE_BALL_UPRIGHT;
+			}
+			// obstaculo direito
+			else if (ball->x + 1 >= MAX_SCREEN_WIDTH) {
+				ball->x-= 2;
+				ball->y+= 2;
+				ball->trajectory = MOVE_BALL_DOWNLEFT;
+			}
+			//// livre
+			else {
+				ball->x+= 2;
+				ball->y+= 2;
+			}
+			 //o mesmo, mas apra os tijolos
 
 
 		case MOVE_BALL_DOWNLEFT:
-			////obstaculo canto
-			//if (ball->x - 1 == 0 && ball->y + 1 == MAX_SCREEN_HEIGHT )
-			//	ball->trajectory = MOVE_BALL_UPRIGHT;
-			//// obstaculo inferior
-			//else if (ball->y + 1 == MAX_SCREEN_HEIGHT) {
-			//	ball->x--;
-			//	ball->y--;
-			//	ball->trajectory = MOVE_BALL_UPLEFT;
-			//}
-			//// obstaculo esquerdo
-			//else if (ball->x - 1 == 0) {
-			//	ball->x++;
-			//	ball->y++;
-			//	ball->trajectory = MOVE_BALL_DOWNRIGHT;
-			//}
-			//// livre
-			//else {
-				ball->x--;
-				ball->y++;
-			//}
-			// o mesmo, mas apra os tijolos
+			//obstaculo canto
+			if (ball->x - 1 <= 0 && ball->y + 1 >= MAX_SCREEN_HEIGHT )
+				ball->trajectory = MOVE_BALL_UPRIGHT;
+			// obstaculo inferior
+			else if (ball->y + 1 >= MAX_SCREEN_HEIGHT) {
+				ball->x-= 2;
+				ball->y-= 2;
+				ball->trajectory = MOVE_BALL_UPLEFT;
+			}
+			// obstaculo esquerdo
+			else if (ball->x - 1 <= 0) {
+				ball->x+= 2;
+				ball->y+= 2;
+				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+			}
+			// livre
+			else {
+				ball->x-= 2;
+				ball->y+= 2;
+			}
+			 //o mesmo, mas apra os tijolos
 
 
 		case MOVE_BALL_UPLEFT:
-			////obstaculo canto
-			//if (ball->x - 1 == 0 && ball->y - 1 == 0)
-			//	ball->trajectory = MOVE_BALL_DOWNRIGHT;
-			//// obstaculo superior
-			//else if (ball->y - 1 == 0) {
-			//	ball->x--;
-			//	ball->y++;
-			//	ball->trajectory = MOVE_BALL_DOWNLEFT;
-			//}
-			//// obstaculo esquerdo
-			//else if (ball->x + 1 == MAX_SCREEN_WIDTH) {
-			//	ball->x++;
-			//	ball->y--;
-			//	ball->trajectory = MOVE_BALL_UPRIGHT;
-			//}
-			//// livre
-			//else {
-				ball->x--;
-				ball->y--;
-			//}
-			// o mesmo, mas apra os tijolos
+			//obstaculo canto
+
+			if (ball->x - 1 <= 0 && ball->y - 1 <= 0)
+				ball->trajectory = MOVE_BALL_DOWNRIGHT;
+			// obstaculo superior
+			else if (ball->y - 1 <= 0) {
+				ball->x-=2;
+				ball->y+=2;
+				ball->trajectory = MOVE_BALL_DOWNLEFT;
+			}
+			// obstaculo esquerdo
+			else if (ball->x - 1 <= 0) {
+				ball->x+=2;
+				ball->y-=2;
+				ball->trajectory = MOVE_BALL_UPRIGHT;
+			}
+			// livre
+			else {
+				ball->x-=2;
+				ball->y-=2;
+			}
+			//o mesmo, mas apra os tijolos
 
 /*
 			//--------
