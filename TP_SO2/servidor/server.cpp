@@ -377,7 +377,8 @@ BOOL HandleAction(PLAYERS pAction, HANDLE pipeConection)
 		int i;
 		for (i = 0; i < nBars; i++)
 			if (bars[i].idPlayer == pAction.id)
-				bars[i].x -= 10;
+				if(bars[i].x > 0 && bars[i].x < 1024 - bars[i].size)
+					bars[i].x -= 5;
 	
 		_tprintf(TEXT("Bar X: %d\n"), bars[0].x);
 	}
@@ -386,7 +387,10 @@ BOOL HandleAction(PLAYERS pAction, HANDLE pipeConection)
 		int i;
 		for (i = 0; i < nBars; i++)
 			if (bars[i].idPlayer == pAction.id)
-				bars[i].x += 10;
+				if (bars[i].x >= 0 && bars[i].x <= 1020 - bars[i].size)
+					bars[i].x += 5;
+				else
+					bars[i].x -= 5;
 		_tprintf(TEXT("Bar X: %d"), bars[0].x);
 	}
 

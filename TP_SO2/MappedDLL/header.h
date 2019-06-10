@@ -44,7 +44,7 @@
 #define BRICK_TRIPLE 4
 #define MAX_SCREEN_WIDTH 1024
 #define MAX_SCREEN_HEIGHT 768
-#define BAR_SIZE 65
+#define BAR_SIZE 60
 
 typedef struct {
 	TCHAR names[10][MAX];

@@ -321,7 +321,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		SelectObject(dcAux[3], bitAnim3);
 		SelectObject(dcAux[4], bitBrickHard);
 		SelectObject(dcAux[5], bitBrickMagic);
-
+		
 		if (tipe != -1) {
 			for (int i = 0; i < gameP.nBars; i++)
 			{
@@ -331,13 +331,12 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			for (i = 0; i < gameP.nBricks; i++)
 			{
 				if (gameP.bricks[i].health == 0) {
-					
+					BitBlt(hdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[2], 0, 0, SRCCOPY);
+					BitBlt(memdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[2], 0, 0, SRCCOPY);
 				}
 				else {
 					BitBlt(hdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
 					BitBlt(memdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
-					//Rectangle(hdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
-					//Rectangle(memdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
 				}
 			}
 			for (i = 0; i < gameP.nBalls; i++)
