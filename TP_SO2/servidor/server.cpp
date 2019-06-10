@@ -4,7 +4,7 @@ SHAREDMEM message;
 GAMEDATA gamedata;
 PLAYERS* players = NULL;
 BALL* balls;
-BRICK bricks[NUMBER_TOTAL_BRIKS];
+BRICK *bricks;
 
 TCHAR nome[10][MAXT] = { TEXT("User 1"), TEXT("User 2"), TEXT("User 3"), TEXT("User 4"), TEXT("User 5"), TEXT("User 6"), TEXT("User 7"), TEXT("User 8"), TEXT("User 9"), TEXT("User 10") };
 static int values[10] = { 90, 80, 70, 60, 50, 40, 30, 20, 10, 0 };
@@ -168,6 +168,7 @@ int _tmain(int argc, TCHAR* argv[])
 	hMovBola = CreateHandleArray(hMovBola, &nBalls);
 	ballThreadId = ballIdArray(ballThreadId, &nBalls);
 	balls = CreateBallArray(balls, &nBalls);
+	bricks = CreateBricks(bricks);
 
 	hMovBola[nBalls - 1] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)BallMovement, (LPVOID)& ballThreadId[nBalls - 1], CREATE_SUSPENDED, (LPDWORD)& ballThreadId[nBalls - 1]);
 
@@ -474,6 +475,9 @@ BOOL SendBroadcast(BALL* ball)
 	for (int i = 0; i < nBalls; i++)
 		gamedata.ball[gamedata.in][i] = ball[i];
 	gamedata.nBalls = nBalls;
+	for (int i = 0; i < NUMBER_TOTAL_BRIKS; i++)
+		gamedata.bricks[gamedata.in][i] = bricks[i];
+	gamedata.nBricks = NUMBER_TOTAL_BRIKS;
 	//_tprintf(__T("BALL -> x: %d y: %d IN: %d OUT: %d\n"), gamedata.ball[gamedata.in].x, gamedata.ball[gamedata.in].y, gamedata.in, gamedata.out);
 
 	if (gamedata.out == 10)
@@ -543,7 +547,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 				ball->y-=1;
 			}
 			 //o mesmo, mas apra os tijolos
-
+			break;
 
 		case MOVE_BALL_DOWNRIGHT:
 			//obstaculo canto
@@ -567,7 +571,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 				ball->y+= 2;
 			}
 			 //o mesmo, mas apra os tijolos
-
+			break;
 
 		case MOVE_BALL_DOWNLEFT:
 			//obstaculo canto
@@ -591,7 +595,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 				ball->y+= 2;
 			}
 			 //o mesmo, mas apra os tijolos
-
+			break;
 
 		case MOVE_BALL_UPLEFT:
 			//obstaculo canto
@@ -616,7 +620,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 				ball->y-=2;
 			}
 			//o mesmo, mas apra os tijolos
-
+			break;
 /*
 			//--------
 			if (ball.y - 1 == 0)
@@ -798,55 +802,59 @@ BOOL AddBall()
 	return 1;
 }
 
-void CreatBricks()
+BRICK * CreateBricks(BRICK *varBricks)
 {
 	srand(time(NULL));
 	int randNum;
+	varBricks = (BRICK *)malloc(sizeof(BRICK) * NUMBER_TOTAL_BRIKS);
+	if (varBricks == NULL)
+		return varBricks;
+
 	for (int i = 0, line=0, col = 0; i < NUMBER_TOTAL_BRIKS; i++)
 	{
 		// set da coordenada xy.
 		if (col++ < NUMBER_BRIKS_COL) {
-			bricks[i].x = X_STARPOINT_BRICKS + col * BRICK_WIDTH;
-			bricks[i].y = Y_STARPOINT_BRICKS + line * BRICK_HEIGHT;
+			varBricks[i].x = X_STARPOINT_BRICKS + col * BRICK_WIDTH;
+			varBricks[i].y = Y_STARPOINT_BRICKS + line * BRICK_HEIGHT;
 		}
 		else {
 			col = 0;
 			line++;
-			bricks[i].x = X_STARPOINT_BRICKS + col * BRICK_WIDTH;
-			bricks[i].y = Y_STARPOINT_BRICKS + line * BRICK_HEIGHT;
+			varBricks[i].x = X_STARPOINT_BRICKS + col * BRICK_WIDTH;
+			varBricks[i].y = Y_STARPOINT_BRICKS + line * BRICK_HEIGHT;
 		}
 
 		randNum = rand() % 100;
 		if (randNum > 40) {
-			bricks[i].health = 1;
-			bricks[i].type = STD_BRICK;
+			varBricks[i].health = 1;
+			varBricks[i].type = STD_BRICK;
 		}
 		else if (randNum > 30) {
-			bricks[i].type = STD_BRICK;
-			bricks[i].health = 2;
+			varBricks[i].type = STD_BRICK;
+			varBricks[i].health = 2;
 		}
 		else if (randNum > 20) {
-			bricks[i].type = STD_BRICK;
-			bricks[i].health = 3;
+			varBricks[i].type = STD_BRICK;
+			varBricks[i].health = 3;
 		}
 		else if (randNum > 10) {
-			bricks[i].type = STD_BRICK;
-			bricks[i].health = 4;
+			varBricks[i].type = STD_BRICK;
+			varBricks[i].health = 4;
 		}
 		else {
-			bricks[i].health = 1;
+			varBricks[i].health = 1;
 			randNum = rand() % 4;
 			if (randNum == 1)
-				bricks[i].type = BRICK_SPEEDUP;
+				varBricks[i].type = BRICK_SPEEDUP;
 			else if (randNum == 2)
-				bricks[i].type = BRICK_SLOWDOWN;
+				varBricks[i].type = BRICK_SLOWDOWN;
 			else if (randNum == 3)
-				bricks[i].type = BRICK_EXTRALIFE;
+				varBricks[i].type = BRICK_EXTRALIFE;
 			else
-				bricks[i].type = BRICK_TRIPLE;
+				varBricks[i].type = BRICK_TRIPLE;
 		}
 	}
-	return;
+	return varBricks;
 }
 
 BOOL RemoveBall()
@@ -1182,8 +1190,11 @@ BOOL SendBroadcastPipe(BALL *balls) {
 	GAMEDATAPIPE data;
 
 	data.nBalls = nBalls;
+	data.nBricks = NUMBER_TOTAL_BRIKS;
 	for (int i = 0; i < nBalls; i++)
 		data.ball[i] = balls[i];
+	for (int i = 0; i < data.nBricks; i++)
+		data.bricks[i] = bricks[i];
 	
 	for (int j = 0; j < nPipes; j++) {
 

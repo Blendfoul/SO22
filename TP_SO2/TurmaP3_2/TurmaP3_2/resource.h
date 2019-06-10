@@ -9,6 +9,12 @@
 #define IDD_DIALOG2                     107
 #define IDD_DIALOG3                     109
 #define IDD_DIALOG4                     111
+#define IDB_BITMAP2                     113
+#define IDB_BITMAP3                     114
+#define IDB_BITMAP4                     115
+#define IDB_BITMAP5                     116
+#define IDB_BITMAP6                     117
+#define IDB_BITMAP7                     118
 #define IDC_IPADDRESS1                  1001
 #define IDC_EDIT1                       1002
 #define IDC_LIST1                       1003
@@ -25,7 +31,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        113
+#define _APS_NEXT_RESOURCE_VALUE        119
 #define _APS_NEXT_COMMAND_VALUE         40009
 #define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101

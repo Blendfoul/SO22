@@ -96,12 +96,14 @@ typedef struct
 	int nBalls;
 	int nBricks;
 	BALL ball[10][5];
-	BRICK bricks[10][20];
+	BRICK bricks[10][NUMBER_TOTAL_BRIKS	];
 }GAMEDATA;
 
 typedef struct {
 	int nBalls;
+	int nBricks;
 	BALL ball[5];
+	BRICK bricks[NUMBER_TOTAL_BRIKS];
 }GAMEDATAPIPE;
 
 // TODO: reference additional headers your program requires here

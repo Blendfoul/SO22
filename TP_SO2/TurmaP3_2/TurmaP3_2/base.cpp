@@ -168,14 +168,14 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int
 LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
-	HDC memdc = NULL;
+	static HDC memdc;
 	static TCHAR c;
 	static int x = 10, y = 10, xi = 0, yi = 0, xf = 0, yf = 0;
 	PAINTSTRUCT ps;
 
-	static HBITMAP bitTijolo;
+	static HBITMAP bitBrick, bitAnim1, bitAnim2, bitAnim3, bitBrickHard, bitBrickMagic;
 	HBITMAP fundo;
-	static HDC dcAux;
+	static HDC dcAux[6];
 	
 	
 	
@@ -229,7 +229,6 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG1), hWnd, (DLGPROC)EventLogin);
 				if (aux.code == 1) {
 					PlaySound(TEXT("login.wav"), NULL, SND_FILENAME | SND_ASYNC);
-					//PlaySound(TEXT("coins.wav"), NULL, SND_FILENAME | SND_ASYNC);
 					DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
 				}
 				break;
@@ -290,7 +289,12 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		}
 		break;
 	case WM_CREATE:
-		bitTijolo = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1));
+		bitBrick = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP4));
+		bitAnim1 = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP3));
+		bitAnim2 = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP2));
+		bitAnim3 = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP5));
+		bitBrickHard = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP6));
+		bitBrickMagic = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP7));
 
 		hdc = GetDC(hWnd);
 		memdc = CreateCompatibleDC(hdc);
@@ -308,8 +312,15 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		int i;
 		hdc = GetDC(hWnd);
 
-		//dcAux = CreateCompatibleDC((HDC)(hdc));
-		SelectObject(dcAux, bitTijolo);
+		for (int i = 0; i < 6; i++)
+			dcAux[i] = CreateCompatibleDC((HDC)(hdc));
+		
+		SelectObject(dcAux[0], bitBrick);
+		SelectObject(dcAux[1], bitAnim1);
+		SelectObject(dcAux[2], bitAnim2);
+		SelectObject(dcAux[3], bitAnim3);
+		SelectObject(dcAux[4], bitBrickHard);
+		SelectObject(dcAux[5], bitBrickMagic);
 
 		if (tipe != -1) {
 			switch (tipe)
@@ -331,6 +342,18 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 				}
 				break;
 			case 1:
+				for (i = 0; i < gameP.nBricks; i++)
+				{
+					if (gameP.bricks[i].health == 0) {
+					
+					}
+					else {
+						BitBlt(hdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
+						BitBlt(memdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
+						//Rectangle(hdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
+						//Rectangle(memdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
+					}
+				}
 				for (i = 0; i < gameP.nBalls; i++)
 				{
 					Ellipse(hdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
@@ -342,6 +365,8 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		}
 
 		EndPaint(hWnd, &ps);
+		for (int i = 0; i < 6; i++)
+			DeleteDC(dcAux[i]);
 		ReleaseDC(hWnd, hdc);
 		break;
 	case WM_KEYDOWN:
