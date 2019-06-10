@@ -627,14 +627,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 				ball->trajectory = MOVE_BALL_DOWNLEFT;
 				freeway = FALSE;
 			}
-			// embateu barra
-			//else if(ball->x-1 >= barra x && ball->x+1 <= barra x + sizebarra)
-			//	if (ball->y + 1 >= barra y) {
-			//		ball->x++;
-			//		ball->y--;
-			//freeway = FALSE;
-			//		break; // para o ciclio das barras
-			//	}
+			// embater tijolo
 			else {
 				for (int i = 0; i < NUMBER_TOTAL_BRIKS; i++)
 				{
@@ -658,6 +651,16 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 						}
 					}
 				}
+			}
+			// embateu barra
+			for (int i = 0; i < nBars; i++) {
+				if (ball->x - 1 >= bars[i].x && ball->x + 1 <= bars[i].x + bars[i].size)
+					if (ball->y + 1 >= bars[i].y) {
+						ball->x++;
+						ball->y--;
+						break;
+						freeway = FALSE;
+					}
 			}
 			// livre
 			if (freeway) {
@@ -719,6 +722,16 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 						}
 					}
 				}
+			}
+			// embateu barra
+			for (int i = 0; i < nBars; i++) {
+				if (ball->x - 1 >= bars[i].x && ball->x + 1 <= bars[i].x + bars[i].size)
+					if (ball->y + 1 >= bars[i].y) {
+						ball->x--;
+						ball->y--;
+						break;
+						freeway = FALSE;
+					}
 			}
 			// livre
 			if (freeway) {
