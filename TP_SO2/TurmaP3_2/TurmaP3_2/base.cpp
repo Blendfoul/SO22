@@ -323,44 +323,23 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		SelectObject(dcAux[5], bitBrickMagic);
 
 		if (tipe != -1) {
-			switch (tipe)
+			for (i = 0; i < gameP.nBricks; i++)
 			{
-			case 0:
-				for (i = 0; i < game.nBricks; i++)
-				{
-					//BitBlt(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
-					//BitBlt(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
-					Rectangle(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
-					Rectangle(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
-
-				}
-				for (i = 0; i < game.nBalls; i++)
-				{
-					Ellipse(hdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
-					Ellipse(memdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
-					Sleep(game.ball[game.out][i].accel);
-				}
-				break;
-			case 1:
-				for (i = 0; i < gameP.nBricks; i++)
-				{
-					if (gameP.bricks[i].health == 0) {
+				if (gameP.bricks[i].health == 0) {
 					
-					}
-					else {
-						BitBlt(hdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
-						BitBlt(memdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
-						//Rectangle(hdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
-						//Rectangle(memdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
-					}
 				}
-				for (i = 0; i < gameP.nBalls; i++)
-				{
-					Ellipse(hdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
-					Ellipse(memdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
-					Sleep(gameP.ball->accel);
+				else {
+					BitBlt(hdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
+					BitBlt(memdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
+					//Rectangle(hdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
+					//Rectangle(memdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
 				}
-				break;
+			}
+			for (i = 0; i < gameP.nBalls; i++)
+			{
+				Ellipse(hdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
+				Ellipse(memdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
+				Sleep(gameP.ball->accel);
 			}
 		}
 
@@ -410,9 +389,7 @@ LRESULT CALLBACK EventLogin(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
 				LIVE = TRUE;
 
 				if (aux.code == 1)
-				{
 					MessageBox(hWnd, TEXT("[REMOTO]Login com sucesso!"), TEXT("Login Result"), MB_OK);
-				}
 				else
 					MessageBox(hWnd, TEXT("[REMOTO]Login sem sucesso!"), TEXT("Login Result"), MB_OK);
 
@@ -552,7 +529,7 @@ DWORD WINAPI Ball(LPVOID param)
 		{
 		case 0:
 			if (LOCALON == TRUE)
-				game = RecieveBroadcast(&game);
+				gameP = RecieveBroadcastPipe(&gameP, aux.ipAdress, aux.code);
 			break;
 		case 1:
 			gameP = RecieveBroadcastPipe(&gameP, aux.ipAdress, aux.code);

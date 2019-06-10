@@ -466,7 +466,7 @@ BOOL BuildReply(PLAYERS* pAction)
 	return true;
 }
 
-BOOL SendBroadcast(BALL* ball)
+BOOL SendBroadcast(BALL* ball)//Deprecated in Final release
 {
 
 	WaitForSingleObject(hCanWriteBroad, INFINITE);
@@ -770,7 +770,7 @@ DWORD WINAPI BallMovement(LPVOID lparam)
 		if(nPipes > 0)
 			SendBroadcastPipe(balls);
 		if(memPlayers > 0)
-			SendBroadcast(balls);
+			SendBroadcastPipe(balls);
 	}
 	return 0;
 }
