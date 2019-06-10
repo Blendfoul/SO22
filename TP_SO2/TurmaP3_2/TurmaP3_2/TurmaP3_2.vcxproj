@@ -91,7 +91,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>"$(Solutiondir)x64\Debug\MappedDLL.lib";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>"$(Solutiondir)x64\Debug\MappedDLL.lib";"winmm.lib";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,6 +134,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="bitmap1.bmp" />
+    <Image Include="bitmap2.bmp" />
+    <Image Include="bitmap3.bmp" />
+    <Image Include="bitmap4.bmp" />
+    <Image Include="bitmap5.bmp" />
+    <Image Include="bitmap6.bmp" />
+    <Image Include="bitmap7.bmp" />
     <Image Include="icon1.ico" />
   </ItemGroup>
   <ItemGroup>

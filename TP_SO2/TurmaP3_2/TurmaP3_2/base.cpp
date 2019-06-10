@@ -168,14 +168,14 @@ int __stdcall WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int
 LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
-	HDC memdc = NULL;
+	static HDC memdc;
 	static TCHAR c;
 	static int x = 10, y = 10, xi = 0, yi = 0, xf = 0, yf = 0;
 	PAINTSTRUCT ps;
 
-	static HBITMAP bitTijolo;
+	static HBITMAP bitBrick, bitAnim1, bitAnim2, bitAnim3, bitBrickHard, bitBrickMagic;
 	HBITMAP fundo;
-	static HDC dcAux;
+	static HDC dcAux[6];
 	
 	
 	
@@ -196,6 +196,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			LIVE = FALSE;
 			if (aux.code == LOGOUTSUCCESS)
 				MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
+			PlaySound(TEXT("logoff.wav"), 0, SND_FILENAME | SND_ASYNC);
 			PostQuitMessage(0);
 			break;
 		case 0:
@@ -205,6 +206,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			LIVE = FALSE;
 			if (aux.code == LOGOUTSUCCESS)
 				MessageBox(hWnd, TEXT("Logout com sucesso"), TEXT("Servidor"), MB_OK);
+			PlaySound(TEXT("logoff.wav"), 0, SND_FILENAME | SND_ASYNC);
 			PostQuitMessage(0);
 			break;
 		default:
@@ -225,7 +227,10 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			case -1:
 				tipe = 1;
 				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG1), hWnd, (DLGPROC)EventLogin);
-				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
+				if (aux.code == 1) {
+					PlaySound(TEXT("login.wav"), NULL, SND_FILENAME | SND_ASYNC);
+					DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
+				}
 				break;
 			default:
 				MessageBox(hWnd, TEXT("Cliente já logado!"), TEXT("Servidor"), MB_OK);
@@ -238,7 +243,11 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			case -1:
 				tipe = 0;
 				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG3), hWnd, (DLGPROC)EventLogin);
-				DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
+				if (aux.code == 1) {
+					PlaySound(TEXT("login.wav"), 0, SND_FILENAME | SND_ASYNC);
+					//PlaySound(TEXT("coins.wav"), 0, SND_FILENAME | SND_ASYNC);
+					DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG4), NULL, (DLGPROC)CallUserStats);
+				}
 				break;
 			default:
 				MessageBox(hWnd, TEXT("Cliente já logado!"), TEXT("Servidor"), MB_OK);
@@ -246,6 +255,7 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 			}
 			break;
 		case ID_JOGO_TOP10:
+			PlaySound(TEXT("coins.wav"), 0, SND_FILENAME | SND_ASYNC);
 			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG2), hWnd, (DLGPROC)CallTop10);
 			break;
 		case ID_JOGO_SAIR:
@@ -279,7 +289,12 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		}
 		break;
 	case WM_CREATE:
-		bitTijolo = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1));
+		bitBrick = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP4));
+		bitAnim1 = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP3));
+		bitAnim2 = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP2));
+		bitAnim3 = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP5));
+		bitBrickHard = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP6));
+		bitBrickMagic = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP7));
 
 		hdc = GetDC(hWnd);
 		memdc = CreateCompatibleDC(hdc);
@@ -297,38 +312,40 @@ LRESULT CALLBACK TrataEventos(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lPara
 		int i;
 		hdc = GetDC(hWnd);
 
-		//dcAux = CreateCompatibleDC((HDC)(hdc));
-		SelectObject(dcAux, bitTijolo);
+		for (int i = 0; i < 6; i++)
+			dcAux[i] = CreateCompatibleDC((HDC)(hdc));
+		
+		SelectObject(dcAux[0], bitBrick);
+		SelectObject(dcAux[1], bitAnim1);
+		SelectObject(dcAux[2], bitAnim2);
+		SelectObject(dcAux[3], bitAnim3);
+		SelectObject(dcAux[4], bitBrickHard);
+		SelectObject(dcAux[5], bitBrickMagic);
 
-		switch (tipe)
-		{
-		case 0:
-			for (i = 0; i < game.nBricks; i++)
+		if (tipe != -1) {
+			for (i = 0; i < gameP.nBricks; i++)
 			{
-				//BitBlt(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
-				//BitBlt(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT, dcAux, 0, 0, SRCCOPY);
-				Rectangle(hdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
-				Rectangle(memdc, game.bricks[game.out][i].x, game.bricks[game.out][i].y, game.bricks[game.out][i].x + BRICK_WIDTH, game.bricks[game.out][i].y + BRICK_HEIGHT);
-			
+				if (gameP.bricks[i].health == 0) {
+					
+				}
+				else {
+					BitBlt(hdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
+					BitBlt(memdc, gameP.bricks[i].x, gameP.bricks[i].y, BRICK_WIDTH, BRICK_HEIGHT, dcAux[0], 0, 0, SRCCOPY);
+					//Rectangle(hdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
+					//Rectangle(memdc, gameP.bricks[i].x, gameP.bricks[i].y, gameP.bricks[i].x + BRICK_WIDTH, gameP.bricks[i].y + BRICK_HEIGHT);
+				}
 			}
-			for (i = 0; i < game.nBalls; i++)
-			{
-				Ellipse(hdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
-				Ellipse(memdc, game.ball[game.out][i].x - 4, game.ball[game.out][i].y - 4, game.ball[game.out][i].x + 4, game.ball[game.out][i].y + 4);
-				Sleep(game.ball[game.out][i].accel);
-			}
-			break;
-		case 1:
 			for (i = 0; i < gameP.nBalls; i++)
 			{
 				Ellipse(hdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
 				Ellipse(memdc, gameP.ball->x - 4, gameP.ball->y - 4, gameP.ball->x + 4, gameP.ball->y + 4);
 				Sleep(gameP.ball->accel);
 			}
-			break;
 		}
 
 		EndPaint(hWnd, &ps);
+		for (int i = 0; i < 6; i++)
+			DeleteDC(dcAux[i]);
 		ReleaseDC(hWnd, hdc);
 		break;
 	case WM_KEYDOWN:
@@ -372,9 +389,7 @@ LRESULT CALLBACK EventLogin(HWND hWnd, UINT messg, WPARAM wParam, LPARAM lParam)
 				LIVE = TRUE;
 
 				if (aux.code == 1)
-				{
 					MessageBox(hWnd, TEXT("[REMOTO]Login com sucesso!"), TEXT("Login Result"), MB_OK);
-				}
 				else
 					MessageBox(hWnd, TEXT("[REMOTO]Login sem sucesso!"), TEXT("Login Result"), MB_OK);
 
@@ -514,7 +529,7 @@ DWORD WINAPI Ball(LPVOID param)
 		{
 		case 0:
 			if (LOCALON == TRUE)
-				game = RecieveBroadcast(&game);
+				gameP = RecieveBroadcastPipe(&gameP, aux.ipAdress, aux.code);
 			break;
 		case 1:
 			gameP = RecieveBroadcastPipe(&gameP, aux.ipAdress, aux.code);

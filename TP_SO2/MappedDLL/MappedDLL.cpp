@@ -29,6 +29,7 @@ wchar_t PIPE_SERVER_NAME[100];
 wchar_t PIPE_SERVER_NAME_DATA[100];
 
 BOOL InitPipes(TCHAR* ipAdress);
+BOOL InitPipesBroad(TCHAR* ipAdress);
 BOOL InitSharedMem();
 void Seguranca(SECURITY_ATTRIBUTES* sa);
 void Cleanup(PSID pEveryoneSID, PSID pAdminSID, PACL pACL, PSECURITY_DESCRIPTOR pSD);
@@ -52,7 +53,7 @@ GAMEDATA RecieveBroadcast(GAMEDATA* pGame)
 	ReleaseSemaphore(hCanWriteBroad, 1, NULL);
 
 	return *pGame;
-}
+}//Deprecated in final release
 
 GAMEDATAPIPE RecieveBroadcastPipe(GAMEDATAPIPE* pGame, TCHAR* ipAdress, int command) {
 
@@ -150,6 +151,7 @@ BOOL Login(PLAYERS* client)
 {
 
 	InitSharedMem();
+	InitPipesBroad((wchar_t *)TEXT("."));
 	SendMessages(client);
 
 	return true;
@@ -159,8 +161,10 @@ BOOL Login(PLAYERS* client, TCHAR* ipAdress)
 {
 
 	_tprintf(TEXT("IP Recebido: %s\n"), ipAdress);
-	if (InitPipes(ipAdress) == FALSE)
+	if (InitPipes(ipAdress) == FALSE) {
+		InitPipesBroad(ipAdress);
 		SendMessages(client, ipAdress);
+	}
 	else {
 		_tprintf(TEXT("Failed to connect!\n"));
 		return TRUE;
@@ -185,9 +189,6 @@ BOOL InitPipes(TCHAR* ipAdress)
 	swprintf(PIPE_SERVER_NAME, 100, TEXT("\\\\%s\\pipe\\arkanoid"), (wchar_t*)ipAdress);
 	_tprintf(TEXT("%s\n"), PIPE_SERVER_NAME);
 
-	swprintf(PIPE_SERVER_NAME_DATA, 100, TEXT("\\\\%s\\pipe\\arkanoidDATA"), (wchar_t*)ipAdress);
-	_tprintf(TEXT("%s\n"), PIPE_SERVER_NAME_DATA);
-
 	Seguranca(&sa);
 
 	hPipe = CreateFile(PIPE_SERVER_NAME, GENERIC_READ | GENERIC_WRITE, 0, &sa, OPEN_EXISTING, 0, NULL);
@@ -199,14 +200,27 @@ BOOL InitPipes(TCHAR* ipAdress)
 
 	_tprintf(TEXT("Connect Success CLIENT!\n"));
 	
-	hBroad = CreateFile(PIPE_SERVER_NAME_DATA, GENERIC_READ, 0, &sa, OPEN_EXISTING, 0, NULL);
 	
+	return FALSE;
+}
+
+BOOL InitPipesBroad(TCHAR* ipAdress) {
+
+	if(_tcscmp(ipAdress, TEXT(".")) == 0)
+		Seguranca(&sa);
+
+	swprintf(PIPE_SERVER_NAME_DATA, 100, TEXT("\\\\%s\\pipe\\arkanoidDATA"), (wchar_t*)ipAdress);
+	_tprintf(TEXT("%s\n"), PIPE_SERVER_NAME_DATA);
+
+	hBroad = CreateFile(PIPE_SERVER_NAME_DATA, GENERIC_READ, 0, &sa, OPEN_EXISTING, 0, NULL);
+
 	if (hBroad == INVALID_HANDLE_VALUE) {
 		_tprintf(TEXT("[ERRO] Ligar ao pipe '%s'! (CreateFile) GLE: %d\n"), PIPE_SERVER_NAME_DATA, GetLastError());
 		return TRUE;
 	}
 
 	_tprintf(TEXT("Connect Success DATA!\n"));
+
 	return FALSE;
 }
 

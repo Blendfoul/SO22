@@ -32,8 +32,8 @@
 
 #define X_STARPOINT_BRICKS 170
 #define Y_STARPOINT_BRICKS 120
-#define BRICK_WIDTH 34
-#define BRICK_HEIGHT 12
+#define BRICK_WIDTH 38
+#define BRICK_HEIGHT 16
 #define NUMBER_BRIKS_COL 10
 #define NUMBER_BRIKS_LINE 15
 #define NUMBER_TOTAL_BRIKS 150
@@ -96,12 +96,14 @@ typedef struct
 	int nBalls;
 	int nBricks;
 	BALL ball[10][5];
-	BRICK bricks[10][20];
+	BRICK bricks[10][NUMBER_TOTAL_BRIKS	];
 }GAMEDATA;
 
 typedef struct {
 	int nBalls;
+	int nBricks;
 	BALL ball[5];
+	BRICK bricks[NUMBER_TOTAL_BRIKS];
 }GAMEDATAPIPE;
 
 // TODO: reference additional headers your program requires here
